@@ -1,6 +1,7 @@
 {{$textareaContent := .BodyQuery}}
 {{if not $textareaContent}}{{$textareaContent = .IssueTemplate}}{{end}}
 {{if not $textareaContent}}{{$textareaContent = .PullRequestTemplate}}{{end}}
+{{if not $textareaContent}}{{$textareaContent = .PullReviewTemplate}}{{end}}
 {{if not $textareaContent}}{{$textareaContent = .content}}{{end}}
 
 <div class="field">

@@ -43,6 +43,7 @@ import (
 	"code.gitea.io/gitea/services/automerge"
 	"code.gitea.io/gitea/services/forms"
 	"code.gitea.io/gitea/services/gitdiff"
+	issue_service "code.gitea.io/gitea/services/issue"
 	pull_service "code.gitea.io/gitea/services/pull"
 	repo_service "code.gitea.io/gitea/services/repository"
 
@@ -56,6 +57,7 @@ const (
 	tplPullFiles   base.TplName = "repo/pulls/files"
 
 	pullRequestTemplateKey = "PullRequestTemplate"
+	pullReviewTemplateKey = "PullReviewTemplate"
 )
 
 var pullRequestTemplateCandidates = []string{
@@ -77,6 +79,27 @@ var pullRequestTemplateCandidates = []string{
 	".github/pull_request_template.md",
 	".github/pull_request_template.yaml",
 	".github/pull_request_template.yml",
+}
+
+var pullReviewTemplateCandidates = []string{
+	"PULL_REVIEW_TEMPLATE.md",
+	"PULL_REVIEW_TEMPLATE.yaml",
+	"PULL_REVIEW_TEMPLATE.yml",
+	"pull_review_template.md",
+	"pull_review_template.yaml",
+	"pull_review_template.yml",
+	".gitea/PULL_REVIEW_TEMPLATE.md",
+	".gitea/PULL_REVIEW_TEMPLATE.yaml",
+	".gitea/PULL_REVIEW_TEMPLATE.yml",
+	".gitea/pull_review_template.md",
+	".gitea/pull_review_template.yaml",
+	".gitea/pull_review_template.yml",
+	".github/PULL_REVIEW_TEMPLATE.md",
+	".github/PULL_REVIEW_TEMPLATE.yaml",
+	".github/PULL_REVIEW_TEMPLATE.yml",
+	".github/pull_review_template.md",
+	".github/pull_review_template.yaml",
+	".github/pull_review_template.yml",
 }
 
 func getRepository(ctx *context.Context, repoID int64) *repo_model.Repository {
@@ -825,6 +848,21 @@ func ViewPullFiles(ctx *context.Context) {
 	}
 	ctx.Data["CurrentReview"] = currentReview
 	ctx.Data["PendingCodeCommentNumber"] = numPendingCodeComments
+
+	// TEST
+
+	_, templateErrs := issue_service.GetTemplatesFromDefaultBranch(ctx.Repo.Repository, ctx.Repo.GitRepo)
+	if errs := setTemplateIfExists(ctx, pullReviewTemplateKey, pullReviewTemplateCandidates); len(errs) > 0 {
+		for k, v := range errs {
+			templateErrs[k] = v
+		}
+	}
+
+	if len(templateErrs) > 0 {
+		ctx.Flash.Warning(renderErrorOfTemplates(ctx, templateErrs), true)
+	}
+
+	// TEST
 
 	getBranchData(ctx, issue)
 	ctx.Data["IsIssuePoster"] = ctx.IsSigned && issue.IsPoster(ctx.Doer.ID)
